@@ -1,18 +1,11 @@
-import { drizzle } from "drizzle-orm/postgres-js";
-import postgres from "postgres";
+// ~/server/db.ts
+import { drizzle } from "drizzle-orm/neon-http"; // or drizzle-orm/postgres
+import { neon } from "@neondatabase/serverless";
+import * as schema from "./schema"; //
+import { config } from "dotenv";
 
-import { env } from "~/env";
-import * as schema from "./schema";
+config(); // loads env variables
 
-/**
- * Cache the database connection in development. This avoids creating a new connection on every HMR
- * update.
- */
-const globalForDb = globalThis as unknown as {
-  conn: postgres.Sql | undefined;
-};
+const sql = neon(process.env.POSTGRES_URL!);
 
-const conn = globalForDb.conn ?? postgres(env.DATABASE_URL);
-if (env.NODE_ENV !== "production") globalForDb.conn = conn;
-
-export const db = drizzle(conn, { schema });
+export const db = drizzle(sql, { schema }); // 
